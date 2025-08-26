@@ -44,12 +44,12 @@ pipeline {
                     '''
                 }
             }
-            post {
-				always {
-					// Clean up images to save space
-                    //sh "docker rmi ${DOCKER_IMAGE}:${BUILD_NUMBER} || true"
-                }
-            }
+            //post {
+			//	always {
+			//		 Clean up images to save space
+            //        sh "docker rmi ${DOCKER_IMAGE}:${BUILD_NUMBER} || true"
+            //    }
+            //}
         }
     }
 
