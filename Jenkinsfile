@@ -40,16 +40,16 @@ pipeline {
                         docker cp test-container-${BUILD_NUMBER}:/Behaviour-Driven-UI-Test/target ./
 
                         # Cleanup container
-                        #docker rm test-container-${BUILD_NUMBER}
+                        docker rm test-container-${BUILD_NUMBER}
                     '''
                 }
             }
-            //post {
-			//	always {
-			//		 Clean up images to save space
-            //        sh "docker rmi ${DOCKER_IMAGE}:${BUILD_NUMBER} || true"
-            //    }
-            //}
+            post {
+				always {
+					// Clean up images to save space
+                    sh "docker rmi ${DOCKER_IMAGE}:${BUILD_NUMBER} || true"
+                }
+            }
         }
     }
 
