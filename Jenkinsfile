@@ -40,14 +40,14 @@ pipeline {
                         docker cp test-container-${BUILD_NUMBER}:/Behaviour-Driven-UI-Test/target ./
 
                         # Cleanup container
-                        docker rm test-container-${BUILD_NUMBER}
+                        #docker rm test-container-${BUILD_NUMBER}
                     '''
                 }
             }
             post {
 				always {
 					// Clean up images to save space
-                    sh "docker rmi ${DOCKER_IMAGE}:${BUILD_NUMBER} || true"
+                    //sh "docker rmi ${DOCKER_IMAGE}:${BUILD_NUMBER} || true"
                 }
             }
         }
@@ -65,8 +65,8 @@ pipeline {
                 allowMissing: false,
                 alwaysLinkToLastBuild: true,
                 keepAll: true,
-                reportDir: 'target/cucumber-reports',
-                reportFiles: '*.html',
+                reportDir: 'target/cucumber-reports/',
+                reportFiles: 'cucumber-html-report.html',
                 reportName: 'Cucumber Test Report',
                 reportTitles: 'BDD Test Results'
             ])
