@@ -15,15 +15,24 @@ pipeline {
             }
         }
 
-        stage('Build & Test with Docker') {
+        stage('Build Docker Image') {
 			steps {
-				echo 'Building Docker image and running tests...'
-                script {
-					// Build image and run tests in one step
-                    sh '''
-                        # Build Docker image
-                        docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .
+				echo 'Building Docker image...'
+				script {
+					sh '''
+					# Build Docker image
+                    docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .
+					'''
+				}
+			}
 
+        }
+
+        stage('Running Test with Docker') {
+			steps {
+				echo 'Running tests on container...'
+                script {
+                    sh '''
                         # Run tests and copy reports out
                         docker run --name test-container-${BUILD_NUMBER} ${DOCKER_IMAGE}:${BUILD_NUMBER}
 
