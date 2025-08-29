@@ -4,10 +4,7 @@ import io.cucumber.junit.Cucumber;
 import io.cucumber.junit.CucumberOptions;
 import org.junit.runner.RunWith;
 
-/**
- * Alternative TestRunner configuration
- * Uses different plugin syntax to ensure proper HTML directory generation
- */
+
 @RunWith(Cucumber.class)
 @CucumberOptions(
         features = "src/test/resources/features",
