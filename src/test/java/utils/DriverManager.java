@@ -6,6 +6,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
 import java.time.Duration;
@@ -40,10 +41,24 @@ public class DriverManager {
                 driver = new ChromeDriver(chromeOptions);
                 break;
 
+            case "headless-chrome":
+                WebDriverManager.chromedriver().setup();
+                ChromeOptions headlessChromeOptions = getChromeOptions();
+                headlessChromeOptions.addArguments("--headless");
+                driver = new ChromeDriver(headlessChromeOptions);
+                break;
+
             case "firefox":
                 WebDriverManager.firefoxdriver().setup();
                 FirefoxOptions firefoxOptions = getFirefoxOptions();
                 driver = new FirefoxDriver(firefoxOptions);
+                break;
+
+            case "headless-firefox":
+                WebDriverManager.firefoxdriver().setup();
+                FirefoxOptions headlessFirefoxOptions = getFirefoxOptions();
+                headlessFirefoxOptions.addArguments("--headless");
+                driver = new FirefoxDriver(headlessFirefoxOptions);
                 break;
 
             case "edge":
@@ -52,25 +67,21 @@ public class DriverManager {
                 driver = new EdgeDriver(edgeOptions);
                 break;
 
-            case "headless-chrome":
-                WebDriverManager.chromedriver().setup();
-                ChromeOptions headlessChromeOptions = getChromeOptions();
-                headlessChromeOptions.addArguments("--headless");
-                driver = new ChromeDriver(headlessChromeOptions);
-                break;
-
             default:
-                throw new IllegalArgumentException("Browser type not supported: " + browserType);
+                throw new IllegalArgumentException("Browser type not supported: " + browserType +
+                        ". Supported browsers: chrome, headless-chrome, firefox, headless-firefox, edge");
         }
 
         return driver;
     }
 
     /**
-     * Configure Chrome options
+     * Configure Chrome options for Docker/CI environments
      */
     private static ChromeOptions getChromeOptions() {
         ChromeOptions options = new ChromeOptions();
+
+        // Essential for Docker environments
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
@@ -78,13 +89,19 @@ public class DriverManager {
         options.addArguments("--disable-extensions");
         options.addArguments("--disable-web-security");
         options.addArguments("--allow-running-insecure-content");
+        options.addArguments("--disable-background-timer-throttling");
+        options.addArguments("--disable-backgrounding-occluded-windows");
+        options.addArguments("--disable-renderer-backgrounding");
+        options.addArguments("--disable-features=TranslateUI");
+        options.addArguments("--disable-ipc-flooding-protection");
 
-        // For CI environments
-        if (isRunningInCI()) {
+        // For Docker environments specifically
+        if (isRunningInDocker()) {
             options.addArguments("--headless");
-            options.addArguments("--disable-background-timer-throttling");
-            options.addArguments("--disable-backgrounding-occluded-windows");
-            options.addArguments("--disable-renderer-backgrounding");
+            options.addArguments("--remote-debugging-port=9222");
+            options.addArguments("--disable-background-networking");
+            options.addArguments("--disable-default-apps");
+            options.addArguments("--disable-sync");
         }
 
         return options;
@@ -95,9 +112,34 @@ public class DriverManager {
      */
     private static FirefoxOptions getFirefoxOptions() {
         FirefoxOptions options = new FirefoxOptions();
+        FirefoxProfile profile = new FirefoxProfile();
 
-        if (isRunningInCI()) {
+        // Firefox-specific configurations
+        profile.setPreference("dom.webnotifications.enabled", false);
+        profile.setPreference("media.volume_scale", "0.0");
+        profile.setPreference("browser.safebrowsing.malware.enabled", false);
+        profile.setPreference("browser.safebrowsing.phishing.enabled", false);
+        profile.setPreference("browser.download.folderList", 2);
+        profile.setPreference("browser.download.manager.showWhenStarting", false);
+        profile.setPreference("browser.download.dir", System.getProperty("java.io.tmpdir"));
+        profile.setPreference("browser.helperApps.neverAsk.saveToDisk",
+                "application/zip,application/octet-stream,application/x-zip,application/x-zip-compressed,text/css,text/html,text/plain,text/xml,text/comma-separated-values");
+
+        // Performance optimizations
+        profile.setPreference("network.http.pipelining", true);
+        profile.setPreference("network.http.proxy.pipelining", true);
+        profile.setPreference("network.http.pipelining.maxrequests", 8);
+        profile.setPreference("content.notify.interval", 500000);
+        profile.setPreference("content.notify.ontimer", true);
+        profile.setPreference("content.switch.threshold", 250000);
+
+        options.setProfile(profile);
+
+        // For CI/Docker environments
+        if (isRunningInCI() || isRunningInDocker()) {
             options.addArguments("--headless");
+            options.addArguments("--width=1920");
+            options.addArguments("--height=1080");
         }
 
         return options;
@@ -111,8 +153,9 @@ public class DriverManager {
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--window-size=1920,1080");
+        options.addArguments("--disable-extensions");
 
-        if (isRunningInCI()) {
+        if (isRunningInCI() || isRunningInDocker()) {
             options.addArguments("--headless");
         }
 
@@ -125,7 +168,11 @@ public class DriverManager {
     private static void configureDriver(WebDriver driver) {
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
-        driver.manage().window().maximize();
+
+        // Don't maximize in headless mode
+        if (!isRunningInDocker() && !isRunningInCI()) {
+            driver.manage().window().maximize();
+        }
     }
 
     /**
@@ -176,6 +223,22 @@ public class DriverManager {
     }
 
     /**
+     * Check if running in Docker
+     */
+    private static boolean isRunningInDocker() {
+        String docker = System.getenv("DOCKER");
+        String dockerEnv = System.getenv("DOCKERIZED");
+
+        // Check for Docker-specific files
+        java.io.File dockerEnvFile = new java.io.File("/.dockerenv");
+
+        return "true".equalsIgnoreCase(docker) ||
+                "true".equalsIgnoreCase(dockerEnv) ||
+                dockerEnvFile.exists() ||
+                isRunningInCI(); // Assume Docker in CI
+    }
+
+    /**
      * Get browser type from system property or environment variable
      */
     public static String getBrowserType() {
@@ -184,8 +247,20 @@ public class DriverManager {
             browser = System.getenv("BROWSER");
         }
         if (browser == null || browser.isEmpty()) {
-            browser = "chrome"; // default browser
+            browser = "headless-chrome"; // default for Docker
         }
         return browser;
+    }
+
+    /**
+     * Print available browser options
+     */
+    public static void printSupportedBrowsers() {
+        System.out.println("Supported browsers:");
+        System.out.println("  - chrome");
+        System.out.println("  - headless-chrome");
+        System.out.println("  - firefox");
+        System.out.println("  - headless-firefox");
+        System.out.println("  - edge");
     }
 }
