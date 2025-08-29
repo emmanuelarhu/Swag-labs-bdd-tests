@@ -4,10 +4,6 @@ import io.cucumber.java.en.*;
 import utils.TestContext;
 import static org.junit.Assert.*;
 
-/**
- * Step definitions for Login functionality
- * Contains all login-related step implementations
- */
 public class LoginSteps {
 
     private final TestContext testContext;
@@ -22,12 +18,6 @@ public class LoginSteps {
         assertTrue("Login page should be displayed",
                 testContext.getLoginPage().isLoginPageDisplayed());
     }
-
-//    @When("I login with username {string} and password {string}")
-//    public void i_login_with_username_and_password(String username, String password) {
-//        testContext.getLoginPage().login(username, password);
-//        testContext.setTestData(TestContext.CURRENT_USER, username);
-//    }
 
     @Given("I login with username {string} and password {string}")
     public void i_login_as_given_step(String username, String password) {
