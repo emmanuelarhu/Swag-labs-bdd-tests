@@ -75,37 +75,28 @@ pipeline {
         success {
 			echo 'All tests passed successfully!'
 
-            // Slack notification for success
-            script {
-				try {
-					slackSend(
-                        channel: "${SLACK_CHANNEL}",
-                        color: 'good',
-                        message: """
-                        ✅ *BDD Tests - SUCCESS*
+				slackSend(
+                    channel: "${SLACK_CHANNEL}",
+                    color: 'good',
+                    message: """
+                    ✅ *BDD Tests - SUCCESS*
 
-                        *Project:* ${env.JOB_NAME}
-                        *Build:* #${env.BUILD_NUMBER}
-                        *Branch:* ${env.GIT_BRANCH}
-                        *Duration:* ${currentBuild.durationString}
+                    *Project:* ${env.JOB_NAME}
+                    *Build:* #${env.BUILD_NUMBER}
+                    *Branch:* ${env.GIT_BRANCH}
+                    *Duration:* ${currentBuild.durationString}
 
-                        All tests passed successfully!
+                    All tests passed successfully!
 
-                        📊 *Reports:* ${env.BUILD_URL}Cucumber_Test_Report/
-                        """
-                    )
-                } catch (Exception e) {
-					echo "Slack notification failed: ${e.getMessage()}"
-                }
-            }
+                    📊 *Reports:* ${env.BUILD_URL}Cucumber_Test_Report/
+                    """
+                )
         }
 
         failure {
 			echo 'Build failed. Sending notifications...'
 
             // Slack notification for failure
-            script {
-				try {
 					slackSend(
                         channel: "${SLACK_CHANNEL}",
                         color: 'danger',
@@ -123,14 +114,9 @@ pipeline {
                         📊 *Reports:* ${env.BUILD_URL}Cucumber_Test_Report/
                         """
                     )
-                } catch (Exception e) {
-					echo "Slack notification failed: ${e.getMessage()}"
-                }
-            }
+        }
 
             // Email notification for failure
-            script {
-				try {
 					emailext(
                         subject: "❌ BDD Tests Failed - Build #${env.BUILD_NUMBER}",
                         body: """
@@ -152,18 +138,10 @@ pipeline {
                         to: "${EMAIL_RECIPIENTS}",
                         mimeType: 'text/html'
                     )
-                } catch (Exception e) {
-					echo "Email notification failed: ${e.getMessage()}"
-                }
-            }
-        }
 
         unstable {
 			echo 'Tests completed with some failures.'
 
-            // Slack notification for unstable build
-            script {
-				try {
 					slackSend(
                         channel: "${SLACK_CHANNEL}",
                         color: 'warning',
@@ -180,38 +158,6 @@ pipeline {
                         📊 *Reports:* ${env.BUILD_URL}Cucumber_Test_Report/
                         """
                     )
-                } catch (Exception e) {
-					echo "Slack notification failed: ${e.getMessage()}"
-                }
-            }
         }
     }
-
-
-    //post {
-	//	always {
-	//		echo 'Publishing test results...'
-	//
-    //        // Publish HTML reports
-    //        publishHTML([
-    //            allowMissing: false,
-    //            alwaysLinkToLastBuild: true,
-    //            keepAll: true,
-    //            reportDir: 'target/cucumber-reports',
-    //            reportFiles: 'cucumber-html-report.html',
-    //            reportName: 'Cucumber Test Report'
-    //        ])
-	//
-    //        // Archive test results
-    //        archiveArtifacts artifacts: 'target/cucumber-reports/**/*', allowEmptyArchive: true
-    //    }
-	//
-    //    success {
-	//		echo 'All tests passed successfully!'
-    //    }
-	//
-    //    failure {
-	//		echo 'Build failed. Check the logs for details.'
-    //    }
-    //}
 }
