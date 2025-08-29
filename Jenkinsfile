@@ -194,7 +194,7 @@ pipeline {
                 )
 
             emailext(
-                subject: "⚠️ UNSTABLE BUILD: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                subject: "⚠️UNSTABLE BUILD: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: """
                     <html>
                     <body style="font-family: Arial, sans-serif; color: #333;">
