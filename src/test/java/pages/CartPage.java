@@ -22,7 +22,7 @@ public class CartPage extends BasePage {
     private final By emptyCartMessage = By.xpath("//div[@class='cart_list']");
 
     // Dynamic locators
-    private final String removeItemByName = "//div[text()='%s']/ancestor::div[@class='cart_item']//button[text()='Remove']";
+    private final String removeItemByName = "//button[contains(@data-test, 'remove')]";
     private final String cartItemByName = "//div[@class='inventory_item_name' and text()='%s']";
 
     public CartPage(WebDriver driver) {

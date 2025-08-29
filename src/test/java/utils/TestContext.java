@@ -5,10 +5,6 @@ import org.openqa.selenium.WebDriver;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Test Context class to share data between step definitions
- * Uses dependency injection with PicoContainer
- */
 public class TestContext {
 
     private WebDriver driver;
@@ -24,9 +20,6 @@ public class TestContext {
         this.testData = new HashMap<>();
     }
 
-    /**
-     * Initialize all page objects
-     */
     public void initializePages() {
         this.driver = DriverManager.getDriver();
         this.loginPage = new LoginPage(driver);
@@ -114,14 +107,12 @@ public class TestContext {
         return testData.containsKey(key);
     }
 
-    // Common test data keys
     public static final String CURRENT_USER = "current_user";
     public static final String CURRENT_PRODUCT = "current_product";
     public static final String CART_ITEMS = "cart_items";
     public static final String ORDER_TOTAL = "order_total";
     public static final String CHECKOUT_INFO = "checkout_info";
 
-    // User credentials
     public static class UserCredentials {
         public static final String STANDARD_USER = "standard_user";
         public static final String LOCKED_OUT_USER = "locked_out_user";
@@ -131,10 +122,9 @@ public class TestContext {
         public static final String SECRET_SAUCE = "secret_sauce";
     }
 
-    // Test data for checkout
     public static class CheckoutData {
-        public static final String FIRST_NAME = "John";
-        public static final String LAST_NAME = "Smith";
-        public static final String POSTAL_CODE = "233";
+        public static final String FIRST_NAME = "Emmanuel";
+        public static final String LAST_NAME = "Arhu";
+        public static final String POSTAL_CODE = "0244";
     }
 }
