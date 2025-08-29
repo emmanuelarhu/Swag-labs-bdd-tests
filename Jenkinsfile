@@ -91,7 +91,7 @@ pipeline {
                 *Status:* SUCCESS
                 *Triggered By:* ${currentBuild.getBuildCauses()[0].shortDescription}
 
-                🔗 <${env.BUILD_URL}|Build Details> | <${env.BUILD_URL}console|Console Output> | <${env.report}allure|Cucumber Report>
+                🔗 <${env.BUILD_URL}|Build Details> | <${env.BUILD_URL}console|Console Output> | <${env.BUILD_URL}allure|Allure Report>
                     """
                 )
 
@@ -117,7 +117,7 @@ pipeline {
                         <ul>
                             <li><a href="${env.BUILD_URL}" style="color: blue;">Jenkins Build Details</a></li>
                             <li><a href="${env.BUILD_URL}console" style="color: blue;">Console Output</a></li>
-                            <li><a href="${env.report}allure" style="color: blue;">Cucumber Report</a></li>
+                            <li><a href="${env.BUILD_URL}allure" style="color: blue;">Allure Report</a></li>
                         </ul>
 
                         <p>Regards,<br><b>Jenkins CI</b></p>
@@ -140,7 +140,7 @@ pipeline {
                 *Status:* FAILED
                 *Triggered By:* ${currentBuild.getBuildCauses()[0].shortDescription}
 
-                🔗 <${env.BUILD_URL}|Build Details> | <${env.BUILD_URL}console|Console Output> | <${env.report}allure|Cucumber Report>
+                🔗 <${env.BUILD_URL}|Build Details> | <${env.BUILD_URL}console|Console Output> | <${env.BUILD_URL}allure|Allure Report>
                     """
                 )
 
@@ -166,7 +166,7 @@ pipeline {
                         <ul>
                             <li><a href="${env.BUILD_URL}" style="color: blue;">Jenkins Build Details</a></li>
                             <li><a href="${env.BUILD_URL}console" style="color: blue;">Console Output</a></li>
-                            <li><a href="${env.report}allure" style="color: blue;">Cucumber Report</a></li>
+                            <li><a href="${env.BUILD_URL}allure" style="color: blue;">Allure Report</a></li>
                         </ul>
 
                         <p>Regards,<br><b>Jenkins CI</b></p>
@@ -189,12 +189,12 @@ pipeline {
                 *Status:* UNSTABLE
                 *Triggered By:* ${currentBuild.getBuildCauses()[0].shortDescription}
 
-                🔗 <${env.BUILD_URL}|Build Details> | <${env.BUILD_URL}console|Console Output> | <${env.report}|Cucumber Report>
+                🔗 <${env.BUILD_URL}|Build Details> | <${env.BUILD_URL}console|Console Output> | <${env.BUILD_URL}allure|Allure Report>
                     """
                 )
 
             emailext(
-                subject: "⚠️UNSTABLE BUILD: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                subject: "⚠️ UNSTABLE BUILD: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: """
                     <html>
                     <body style="font-family: Arial, sans-serif; color: #333;">
@@ -215,7 +215,7 @@ pipeline {
                         <ul>
                             <li><a href="${env.BUILD_URL}" style="color: blue;">Jenkins Build Details</a></li>
                             <li><a href="${env.BUILD_URL}console" style="color: blue;">Console Output</a></li>
-                            <li><a href="${env.report}allure" style="color: blue;">Cucumber Report</a></li>
+                            <li><a href="${env.BUILD_URL}allure" style="color: blue;">Allure Report</a></li>
                         </ul>
 
                         <p>Regards,<br><b>Jenkins CI</b></p>
