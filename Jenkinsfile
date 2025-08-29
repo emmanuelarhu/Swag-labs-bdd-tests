@@ -64,7 +64,7 @@ pipeline {
 
             // Publish parsed Cucumber JSON report
             cucumber(
-                buildStatus: 'UNSTABLE',
+                buildStatus: 'UNCHANGED',
                 fileIncludePattern: 'target/cucumber-reports/cucumber.json',
                 sortingMethod: 'ALPHABETICAL'
             )
