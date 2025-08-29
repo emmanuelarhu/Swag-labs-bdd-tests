@@ -4,10 +4,6 @@ import io.cucumber.java.en.*;
 import utils.TestContext;
 import static org.junit.Assert.*;
 
-/**
- * Step definitions for Product functionality
- * Contains all product-related step implementations
- */
 public class ProductSteps {
 
     private final TestContext testContext;
