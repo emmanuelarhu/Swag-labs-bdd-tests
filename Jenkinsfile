@@ -1,36 +1,36 @@
 pipeline {
-	agent {
-		label 'linux-agent'
-	}
+    agent {
+        label 'linux-agent'
+    }
 
     environment {
-		DOCKER_IMAGE = 'swag-labs-bdd-tests'
+        DOCKER_IMAGE = 'swag-labs-bdd-tests'
     }
 
     stages {
-		stage('Checkout') {
-			steps {
-				echo 'Checking out code from GitHub...'
+        stage('Checkout') {
+            steps {
+                echo 'Checking out code from GitHub...'
                 checkout scm
             }
         }
 
         stage('Build Docker Image') {
-			steps {
-				echo 'Building Docker image...'
-				script {
-					sh '''
-					# Build Docker image
+            steps {
+                echo 'Building Docker image...'
+                script {
+                    sh '''
+                    # Build Docker image
                     docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .
-					'''
-				}
-			}
+                    '''
+                }
+            }
 
         }
 
         stage('Running Test with Docker') {
-			steps {
-				echo 'Running tests on container...'
+            steps {
+                echo 'Running tests on container...'
                 script {
                     sh '''
                         # Run tests and copy reports out
@@ -45,119 +45,160 @@ pipeline {
                 }
             }
             post {
-				always {
-					// Clean up images to save space
+                always {
+                    // Clean up images to save space
                     sh "docker rmi ${DOCKER_IMAGE}:${BUILD_NUMBER} || true"
                 }
             }
         }
     }
 
+
     post {
-		always {
-			echo 'Publishing test results and reports...'
-
-            // Archive all artifacts
-            archiveArtifacts artifacts: 'target/**/*', allowEmptyArchive: true
-
-            // Publish HTML reports with corrected configuration
-            publishHTML([
-                allowMissing: false,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'target/cucumber-reports/',
-                reportFiles: 'cucumber-html-report.html',
-                reportName: 'Cucumber Test Report',
-                reportTitles: 'BDD Test Results'
-            ])
-        }
-
         success {
-			echo 'All tests passed successfully!'
+            slackSend(
+    color: 'good', // green
+    message: """
+✅ *BUILD SUCCESS*
+*Job:* ${env.JOB_NAME}
+*Build:* #${env.BUILD_NUMBER}
+*Status:* SUCCESS
+*Triggered By:* ${currentBuild.getBuildCauses()[0].shortDescription}
 
-				slackSend(
-                    channel: "${SLACK_CHANNEL}",
-                    color: 'good',
-                    message: """
-                    ✅ *BDD Tests - SUCCESS*
+🔗 <${env.BUILD_URL}|Build Details> | <${env.BUILD_URL}console|Console Output> | <${env.BUILD_URL}allure|Allure Report>
+    """
+)
 
-                    *Project:* ${env.JOB_NAME}
-                    *Build:* #${env.BUILD_NUMBER}
-                    *Branch:* ${env.GIT_BRANCH}
-                    *Duration:* ${currentBuild.durationString}
+emailext(
+    subject: "✅ SUCCESSFUL BUILD: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+    body: """
+        <html>
+        <body style="font-family: Arial, sans-serif; color: #333;">
+            <h2 style="color: green;">✅ Build Successful!</h2>
 
-                    All tests passed successfully!
+            <p>Hello Team,</p>
+            <p>The build <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b> completed <span style="color: green; font-weight: bold;">SUCCESSFULLY</span>.</p>
 
-                    📊 *Reports:* ${env.BUILD_URL}Cucumber_Test_Report/
-                    """
-                )
-        }
+            <h3>🔍 Build Details</h3>
+            <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse;">
+                <tr><th align="left">Job Name</th><td>${env.JOB_NAME}</td></tr>
+                <tr><th align="left">Build Number</th><td>${env.BUILD_NUMBER}</td></tr>
+                <tr><th align="left">Status</th><td style="color: green;"><b>SUCCESS</b></td></tr>
+                <tr><th align="left">Triggered By</th><td>${currentBuild.getBuildCauses()[0].shortDescription}</td></tr>
+            </table>
 
-        failure {
-			echo 'Build failed. Sending notifications...'
+            <h3>📎 Links</h3>
+            <ul>
+                <li><a href="${env.BUILD_URL}" style="color: blue;">Jenkins Build Details</a></li>
+                <li><a href="${env.BUILD_URL}console" style="color: blue;">Console Output</a></li>
+                <li><a href="${env.BUILD_URL}allure" style="color: blue;">Allure Report</a></li>
+            </ul>
 
-            // Slack notification for failure
-					slackSend(
-                        channel: "${SLACK_CHANNEL}",
-                        color: 'danger',
-                        message: """
-                        ❌ *BDD Tests - FAILED*
+            <p>Regards,<br><b>Jenkins CI</b></p>
+        </body>
+        </html>
+    """,
+    mimeType: 'text/html',
+    to: "notebooks8.8.8.8@gmail.com"
+)
 
-                        *Project:* ${env.JOB_NAME}
-                        *Build:* #${env.BUILD_NUMBER}
-                        *Branch:* ${env.GIT_BRANCH}
-                        *Duration:* ${currentBuild.durationString}
+    }
+    failure {
+            slackSend(
+    color: 'danger', // red
+    message: """
+❌ *BUILD FAILED*
+*Job:* ${env.JOB_NAME}
+*Build:* #${env.BUILD_NUMBER}
+*Status:* FAILED
+*Triggered By:* ${currentBuild.getBuildCauses()[0].shortDescription}
 
-                        Some tests failed. Please check the logs.
+🔗 <${env.BUILD_URL}|Build Details> | <${env.BUILD_URL}console|Console Output> | <${env.BUILD_URL}allure|Allure Report>
+    """
+)
 
-                        🔍 *Build Logs:* ${env.BUILD_URL}console
-                        📊 *Reports:* ${env.BUILD_URL}Cucumber_Test_Report/
-                        """
-                    )
-        }
+emailext(
+    subject: "❌ FAILED BUILD: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+    body: """
+        <html>
+        <body style="font-family: Arial, sans-serif; color: #333;">
+            <h2 style="color: red;">❌ Build Failed!</h2>
 
-            // Email notification for failure
-					emailext(
-                        subject: "❌ BDD Tests Failed - Build #${env.BUILD_NUMBER}",
-                        body: """
-                        <h2>BDD Test Automation - Build Failed</h2>
+            <p>Hello Team,</p>
+            <p>The build <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b> has <span style="color: red; font-weight: bold;">FAILED</span>.</p>
 
-                        <p><strong>Project:</strong> ${env.JOB_NAME}</p>
-                        <p><strong>Build Number:</strong> #${env.BUILD_NUMBER}</p>
-                        <p><strong>Branch:</strong> ${env.GIT_BRANCH}</p>
-                        <p><strong>Duration:</strong> ${currentBuild.durationString}</p>
+            <h3>🔍 Build Details</h3>
+            <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse;">
+                <tr><th align="left">Job Name</th><td>${env.JOB_NAME}</td></tr>
+                <tr><th align="left">Build Number</th><td>${env.BUILD_NUMBER}</td></tr>
+                <tr><th align="left">Status</th><td style="color: red;"><b>FAILED</b></td></tr>
+                <tr><th align="left">Triggered By</th><td>${currentBuild.getBuildCauses()[0].shortDescription}</td></tr>
+            </table>
 
-                        <h3>📊 Links:</h3>
-                        <ul>
-                            <li><a href="${env.BUILD_URL}console">Build Console Logs</a></li>
-                            <li><a href="${env.BUILD_URL}Cucumber_Test_Report/">Test Reports</a></li>
-                        </ul>
+            <h3>📎 Links</h3>
+            <ul>
+                <li><a href="${env.BUILD_URL}" style="color: blue;">Jenkins Build Details</a></li>
+                <li><a href="${env.BUILD_URL}console" style="color: blue;">Console Output</a></li>
+                <li><a href="${env.BUILD_URL}allure" style="color: blue;">Allure Report</a></li>
+            </ul>
 
-                        <p>Please check the console logs and test reports for details.</p>
-                        """,
-                        to: "${EMAIL_RECIPIENTS}",
-                        mimeType: 'text/html'
-                    )
+            <p>Regards,<br><b>Jenkins CI</b></p>
+        </body>
+        </html>
+    """,
+    mimeType: 'text/html',
+    to: "notebooks8.8.8.8@gmail.com"
+)
 
-        unstable {
-			echo 'Tests completed with some failures.'
+    }
+    unstable {
+            slackSend(
+    color: 'warning', // yellow
+    message: """
+⚠️ *BUILD UNSTABLE*
+*Job:* ${env.JOB_NAME}
+*Build:* #${env.BUILD_NUMBER}
+*Status:* UNSTABLE
+*Triggered By:* ${currentBuild.getBuildCauses()[0].shortDescription}
 
-					slackSend(
-                        channel: "${SLACK_CHANNEL}",
-                        color: 'warning',
-                        message: """
-                        ⚠️ *BDD Tests - UNSTABLE*
+🔗 <${env.BUILD_URL}|Build Details> | <${env.BUILD_URL}console|Console Output> | <${env.BUILD_URL}allure|Allure Report>
+    """
+)
 
-                        *Project:* ${env.JOB_NAME}
-                        *Build:* #${env.BUILD_NUMBER}
-                        *Branch:* ${env.GIT_BRANCH}
-                        *Duration:* ${currentBuild.durationString}
+emailext(
+    subject: "⚠️ UNSTABLE BUILD: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+    body: """
+        <html>
+        <body style="font-family: Arial, sans-serif; color: #333;">
+            <h2 style="color: orange;">⚠️ Build Unstable!</h2>
 
-                        Some tests failed but build completed.
+            <p>Hello Team,</p>
+            <p>The build <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b> has finished with an <span style="color: orange; font-weight: bold;">UNSTABLE</span> status.</p>
 
-                        📊 *Reports:* ${env.BUILD_URL}Cucumber_Test_Report/
-                        """
-                    )
-        }
+            <h3 style="color: #555;">🔍 Build Details</h3>
+            <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse;">
+                <tr><th align="left">Job Name</th><td>${env.JOB_NAME}</td></tr>
+                <tr><th align="left">Build Number</th><td>${env.BUILD_NUMBER}</td></tr>
+                <tr><th align="left">Status</th><td style="color: orange;"><b>UNSTABLE</b></td></tr>
+                <tr><th align="left">Triggered By</th><td>${currentBuild.getBuildCauses()[0].shortDescription}</td></tr>
+            </table>
+
+            <h3 style="color: #555;">📎 Links</h3>
+            <ul>
+                <li><a href="${env.BUILD_URL}" style="color: blue;">Jenkins Build Details</a></li>
+                <li><a href="${env.BUILD_URL}console" style="color: blue;">Console Output</a></li>
+                <li><a href="${env.BUILD_URL}allure" style="color: blue;">Allure Report</a></li>
+            </ul>
+
+            <p>Regards,<br><b>Jenkins CI</b></p>
+            <p>
+        </body>
+        </html>
+    """,
+    mimeType: 'text/html',
+    to: "notebooks8.8.8.8@gmail.com"
+)
+
     }
 }
+    }
