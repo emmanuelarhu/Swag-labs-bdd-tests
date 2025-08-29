@@ -27,4 +27,4 @@ ENV BROWSER=headless-chrome
 ENV CI=true
 
 # Run tests
-CMD ["mvn", "clean", "test"]
+CMD ["mvn", "clean", "test", "-Dbrowser=headless-firefox"]
