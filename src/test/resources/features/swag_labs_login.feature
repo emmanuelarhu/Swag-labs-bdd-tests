@@ -1,5 +1,5 @@
 @swag_labs
-Feature: Swag Labs Login
+Feature: Swag Labs Valid Login
   As a customer
   I want to login to Swag Labs
   So that I can access the products

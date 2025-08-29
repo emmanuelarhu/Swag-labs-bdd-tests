@@ -1,5 +1,5 @@
 @swag_labs @e2e_flow
-Feature: Swag Labs Shopping Flow
+Feature: Swag Labs End To End Test Flow
   As a customer
   I want to browse and purchase products from Swag Labs
   So that I can complete my shopping successfully
