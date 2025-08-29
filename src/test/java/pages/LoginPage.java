@@ -3,10 +3,6 @@ package pages;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
-/**
- * Page Object for Swag Labs Login page
- * Encapsulates all login page elements and actions
- */
 public class LoginPage extends BasePage {
 
     // Locators
