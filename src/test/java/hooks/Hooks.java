@@ -7,9 +7,6 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 
-/**
- * Simplified Cucumber Hooks for test setup and teardown
- */
 public class Hooks {
 
     private final TestContext testContext;
