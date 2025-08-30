@@ -1,0 +1,5 @@
+# Created at 2025-08-29T15:05:33.613
+Boot Manifest-JAR contains absolute paths in classpath 'E:\Courses\Amalitech GTP\Behaviour-Driven UI Test\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+'other' has different root
+

@@ -1,0 +1,38 @@
+-------------------------------------------------------------------------------
+Test set: runners.TestRunner
+-------------------------------------------------------------------------------
+Tests run: 12, Failures: 5, Errors: 0, Skipped: 0, Time elapsed: 148.0 s <<< FAILURE! -- in runners.TestRunner
+Swag Labs Invalid Login Flow.User cannot login with invalid credentials -- Time elapsed: 13.59 s <<< FAILURE!
+java.lang.AssertionError: Should be redirected to products page after login
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at steps.LoginSteps.i_login_as_given_step(LoginSteps.java:29)
+	at ✽.I login with username "invalid_user" and password "wrong_password"(file:///Behaviour-Driven-UI-Test/src/test/resources/features/swag_labs_invalidLogin.feature:13)
+
+Swag Labs End To End Test Flow.Complete shopping flow - Add item to cart and checkout -- Time elapsed: 5.656 s <<< FAILURE!
+java.lang.AssertionError: Cart page should be displayed
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at steps.CartSteps.i_should_see_item_in_the_cart(CartSteps.java:159)
+	at ✽.I should see "Sauce Labs Backpack" in the cart(file:///Behaviour-Driven-UI-Test/src/test/resources/features/swag_labs_shopping.feature:28)
+
+Swag Labs End To End Test Flow.User cannot login with invalid credentials -- Time elapsed: 15.96 s <<< FAILURE!
+java.lang.AssertionError: Should be redirected to products page after login
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at steps.LoginSteps.i_login_as_given_step(LoginSteps.java:29)
+	at ✽.I login with username "invalid_user" and password "wrong_password"(file:///Behaviour-Driven-UI-Test/src/test/resources/features/swag_labs_shopping.feature:48)
+
+Swag Labs End To End Test Flow.User can remove items from cart -- Time elapsed: 7.813 s <<< FAILURE!
+java.lang.AssertionError: Cart should be empty
+	at org.junit.Assert.fail(Assert.java:89)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at steps.CartSteps.the_cart_should_be_empty(CartSteps.java:59)
+	at ✽.the cart should be empty(file:///Behaviour-Driven-UI-Test/src/test/resources/features/swag_labs_shopping.feature:64)
+
+Swag Labs End To End Test Flow.User can view product details -- Time elapsed: 15.62 s <<< FAILURE!
+org.junit.ComparisonFailure: Cart badge should show correct count expected:<[1]> but was:<[0]>
+	at org.junit.Assert.assertEquals(Assert.java:117)
+	at steps.ProductSteps.the_cart_badge_should_show_items(ProductSteps.java:41)
+	at ✽.the cart badge should show "1" items(file:///Behaviour-Driven-UI-Test/src/test/resources/features/swag_labs_shopping.feature:80)
+
